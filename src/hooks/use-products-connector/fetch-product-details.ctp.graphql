@@ -1,0 +1,39 @@
+query FetchProductDetails($id: String) {
+  product(id: $id) {
+    id
+    key
+    skus
+    version
+    productTypeRef {
+      typeId
+      id
+    }
+    productType {
+      id
+      key
+      name
+      description
+    }
+    masterData {
+      staged {
+        ...Product
+      }
+      current {
+        ...Product
+      }
+    }
+  }
+}
+
+fragment Product on ProductData {
+  skus
+  name(locale: "en")
+  masterVariant {
+    sku
+    id
+    attributesRaw {
+      name
+      value
+    }
+  }
+}
