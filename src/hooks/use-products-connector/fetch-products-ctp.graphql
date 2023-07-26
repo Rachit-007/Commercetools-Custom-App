@@ -5,6 +5,7 @@ query FetchProducts($limit: Int!, $offset: Int!, $sort: [String!]) {
     offset
     results {
       id
+      version
       key
       productType {
         name
