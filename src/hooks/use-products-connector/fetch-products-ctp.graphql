@@ -12,7 +12,16 @@ query FetchProducts($limit: Int!, $offset: Int!, $sort: [String!]) {
       }
       masterData {
         current {
-          name(locale: "en")
+          nameAllLocales {
+            locale
+            value
+          }
+        }
+        staged {
+          nameAllLocales {
+            locale
+            value
+          }
         }
         hasStagedChanges
         published

@@ -1,41 +1,57 @@
 import { defineMessages } from 'react-intl';
-
 export default defineMessages({
   backToProductsList: {
-    id: 'ProductsDetails.backToProductsList',
-    defaultMessage: 'Back to products list',
+    id: 'ProductDetails.backToProductsList',
+    defaultMessage: 'Back to Products list',
   },
   duplicateKey: {
-    id: 'ProductsDetails. ',
-    defaultMessage: 'A product with this key already exists.',
+    id: 'ProductDetails.duplicateKey',
+    defaultMessage: 'A Product with this key already exists.',
   },
   productUpdated: {
-    id: 'ProductsDetails.productUpdated',
-    defaultMessage: 'Products {productName} updated',
+    id: 'ProductDetails.productUpdated',
+    defaultMessage: 'Product {productName} updated',
   },
   productKeyLabel: {
-    id: 'ProductsDetails.productKeyLabel',
-    defaultMessage: 'Products key',
+    id: 'ProductDetails.productKeyLabel',
+    defaultMessage: 'Product key',
+  },
+  productKeyLabelDesc: {
+    id: 'ProductDetails.productKeyLabelDesc',
+    defaultMessage:
+      'Provide a unique Product key to help identify the product.',
   },
   productNameLabel: {
-    id: 'ProductsDetails.productNameLabel',
-    defaultMessage: 'Products name',
+    id: 'ProductDetails.productNameLabel',
+    defaultMessage: 'Product name',
+  },
+  productNameLabelDesc: {
+    id: 'ProductDetails.productNameLabelDesc',
+    defaultMessage: 'Enter the product name in their corresponding locales',
+  },
+  productDescriptionLabel: {
+    id: 'ProductDetails.productDescriptionLabel',
+    defaultMessage: 'Product description',
+  },
+  productDescriptionLabelDesc: {
+    id: 'ProductDetails.productDescriptionLabelDesc',
+    defaultMessage: 'Describe the product in their corresponding locales.',
   },
   productRolesLabel: {
-    id: 'ProductsDetails.productRolesLabel',
-    defaultMessage: 'Products roles',
+    id: 'ProductDetails.productRolesLabel',
+    defaultMessage: 'Product roles',
   },
   hint: {
-    id: 'ProductsDetails.hint',
+    id: 'ProductDetails.hint',
     defaultMessage:
       'This page demonstrates for instance how to use forms, notifications and how to update data using GraphQL, etc.',
   },
   modalTitle: {
-    id: 'ProductsDetails.modalTitle',
+    id: 'ProductDetails.modalTitle',
     defaultMessage: 'Edit product',
   },
   productDetailsErrorMessage: {
-    id: 'ProductsDetails.errorMessage',
+    id: 'ProductDetails.errorMessage',
     defaultMessage:
       'We were unable to fetch the product details. Please check your connection, the provided product ID and try again.',
   },

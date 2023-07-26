@@ -1,4 +1,5 @@
 import {
+  useMcLazyQuery,
   useMcMutation,
   useMcQuery,
 } from '@commercetools-frontend/application-shell';
@@ -10,15 +11,44 @@ import {
   NOTIFICATION_KINDS_SIDE,
 } from '@commercetools-frontend/constants';
 import FetchProductDetailsQuery from './fetch-product-details.ctp.graphql';
-import { useForm } from 'react-hook-form';
+import SearchProductsQuery from './search-product-ctp.graphql';
+import UpdateProductDetailsMutation from './update-product-details.ctp.graphql';
 import { useShowNotification } from '@commercetools-frontend/actions-global';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { createSyncProducts } from '@commercetools/sync-actions';
+import { convertToActionData, createGraphQlUpdateActions } from '../../helpers';
+
+import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
+
+import { NO_VALUE_FALLBACK } from '@commercetools-frontend/constants';
+
+import {
+  formatLocalizedString,
+  transformLocalizedFieldToLocalizedString,
+} from '@commercetools-frontend/l10n';
 
 export const useProducts = ({ page, perPage, tableSorting }) => {
   const [check, setCheck] = useState([]);
   const [updateProductStatus, { data: updatedData }] =
     useMcMutation(ChangeProductStatus);
   const showNotification = useShowNotification();
+
+  const [fetchSearchProducts] = useMcLazyQuery(SearchProductsQuery);
+
+  const searchProducts = async (value) => {
+    try {
+      const { data } = await fetchSearchProducts({
+        variables: {
+          term: value,
+        },
+        context: {
+          target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const { data, loading, error, refetch } = useMcQuery(FetchProductQuery, {
     variables: {
@@ -29,13 +59,11 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
     context: {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
-    fetchPolicy: 'no-cache',
-    nextFetchPolicy: 'no-cache',
   });
 
   const changeStatus = async (e) => {
     const toBeUpdateArray = check.filter(
-      (item) => item.published !== e.target.value
+      (item) => item.published !== e.target.value || item.staged === true
     );
     console.log('--------------->To be update products', toBeUpdateArray);
     if (e.target.value === true) {
@@ -63,7 +91,6 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
           }
         })
       );
-      refetch();
       setCheck([]);
       showNotification({
         kind: NOTIFICATION_KINDS_SIDE.success,
@@ -95,7 +122,7 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
         })
       );
       setCheck([]);
-      refetch();
+      // refetch();
       showNotification({
         kind: NOTIFICATION_KINDS_SIDE.success,
         domain: DOMAINS.SIDE,
@@ -110,23 +137,94 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
     updatedData,
     check,
     changeStatus,
+    searchProducts,
+    refetch,
     setCheck,
   };
 };
 
 export const useProductDetails = ({ id }) => {
-  const { data, loading, error } = useMcQuery(FetchProductDetailsQuery, {
-    variables: {
-      id,
-    },
-    context: {
-      target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
-    },
-  });
+  const { data, loading, error, refetch } = useMcQuery(
+    FetchProductDetailsQuery,
+    {
+      variables: {
+        id,
+      },
+      context: {
+        target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
+      },
+    }
+  );
+
+  const [updateProductStatus, { data: updatedData }] =
+    useMcMutation(ChangeProductStatus);
 
   return {
+    updateProductStatus,
+    refetch,
+    updatedData,
     product: data?.product,
     loading: loading,
     error: error,
   };
+};
+
+export const useProductUpdater = () => {
+  const [updateProductDetails, { loading }] = useMcMutation(
+    UpdateProductDetailsMutation
+  );
+
+  const syncStores = createSyncProducts();
+
+  const execute = async ({ originalDraft, nextDraft }) => {
+    const actions = syncStores.buildActions(
+      nextDraft,
+      convertToActionData(originalDraft)
+    );
+    try {
+      const data = await updateProductDetails({
+        context: {
+          target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
+        },
+        variables: {
+          productId: originalDraft.id,
+          version: originalDraft.version,
+          actions: createGraphQlUpdateActions(actions),
+        },
+      });
+      return data;
+    } catch (graphQlResponse) {
+      throw extractErrorFromGraphQlResponse(graphQlResponse);
+    }
+  };
+
+  return { execute, loading };
+};
+
+export const useLocalLang = () => {
+  const { dataLocale, projectLanguages } = useApplicationContext((context) => ({
+    dataLocale: context.dataLocale,
+    projectLanguages: context.project.languages,
+  }));
+
+  /**
+
+   * To get localized String of name
+
+   * @param {{allLocales:Object,key:String}}
+
+   */
+
+  const getLocalName = ({ allLocales, key }) =>
+    formatLocalizedString(
+      { name: transformLocalizedFieldToLocalizedString(allLocales) },
+      {
+        key: key,
+        locale: dataLocale,
+        fallbackOrder: projectLanguages,
+        fallback: NO_VALUE_FALLBACK,
+      }
+    );
+
+  return { getLocalName };
 };

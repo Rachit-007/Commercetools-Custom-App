@@ -14,6 +14,7 @@ query FetchProductDetails($id: String) {
       name
       description
     }
+    priceMode
     masterData {
       published
       hasStagedChanges
@@ -24,18 +25,40 @@ query FetchProductDetails($id: String) {
         ...Product
       }
     }
+    createdAt
+    lastModifiedAt
   }
 }
-
 fragment Product on ProductData {
   skus
-  name(locale: "en")
+  categories {
+    key
+    nameAllLocales {
+      locale
+      value
+    }
+  }
+  nameAllLocales {
+    locale
+    value
+  }
+  descriptionAllLocales {
+    locale
+    value
+  }
   masterVariant {
     sku
     id
     attributesRaw {
       name
       value
+    }
+    prices {
+      value {
+        currencyCode
+        centAmount
+        fractionDigits
+      }
     }
   }
 }

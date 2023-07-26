@@ -46,7 +46,7 @@ const ChannelDetails = (props) => {
   const handleSubmit = useCallback(
     async (formikValues, formikHelpers) => {
       const data = formValuesToDoc(formikValues);
-      try {
+      try { 
         await channelDetailsUpdater.execute({
           originalDraft: channel,
           nextDraft: data,

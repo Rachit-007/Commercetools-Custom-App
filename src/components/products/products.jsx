@@ -5,7 +5,10 @@ import {
 import { ContentNotification } from '@commercetools-uikit/notifications';
 import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 import React from 'react';
-import { useProducts } from '../../hooks/use-products-connector/use-products-connector';
+import {
+  useLocalLang,
+  useProducts,
+} from '../../hooks/use-products-connector/use-products-connector';
 import DataTable from '@commercetools-uikit/data-table';
 import Stamp from '@commercetools-uikit/stamp';
 import Spacings from '@commercetools-uikit/spacings';
@@ -21,6 +24,9 @@ import ProductDetails from '../product-details';
 import { Switch, useHistory, useRouteMatch, Route } from 'react-router';
 import { GRAPHQL_TARGETS } from '@commercetools-frontend/constants';
 import { includes, some } from 'lodash';
+import SearchTextInput from '@commercetools-uikit/search-text-input';
+
+import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
 
 const Products = () => {
   const match = useRouteMatch();
@@ -28,12 +34,20 @@ const Products = () => {
   const { page, perPage } = usePaginationState();
   const tableSorting = useDataTableSortingState({ key: 'key', order: 'asc' });
 
-  const { products, loading, error, check, setCheck, changeStatus } =
-    useProducts({
-      page,
-      perPage,
-      tableSorting,
-    });
+  const {
+    products,
+    loading,
+    error,
+    check,
+    setCheck,
+    changeStatus,
+    refetch,
+    searchProducts,
+  } = useProducts({
+    page,
+    perPage,
+    tableSorting,
+  });
 
   const columns = [
     {
@@ -49,6 +63,7 @@ const Products = () => {
                   id: item.id,
                   version: item.version,
                   published: item.masterData.published,
+                  staged: item.masterData.hasStagedChanges,
                 };
               });
               setCheck(allCheck);
@@ -67,8 +82,8 @@ const Products = () => {
     { key: 'lastModifiedAt', label: 'Date Modified', isSortable: true },
   ];
 
-  console.log('called on refetch ', products);
-  // console.log(check);
+  const { getLocalName } = useLocalLang();
+
   const itemRenderer = (item, column) => {
     switch (column.key) {
       case 'checkbox':
@@ -84,6 +99,7 @@ const Products = () => {
                     id: item.id,
                     version: item.version,
                     published: item.masterData.published,
+                    staged: item.masterData.hasStagedChanges,
                   },
                 ]);
               }
@@ -92,7 +108,10 @@ const Products = () => {
           ></CheckboxInput>
         );
       case 'masterData':
-        return item.masterData.current.name;
+        return getLocalName({
+          allLocales: item.masterData.staged.nameAllLocales,
+          key: 'name',
+        });
       case 'type':
         return item.productType.name;
       case 'status':
@@ -160,7 +179,12 @@ const Products = () => {
             <Spacings.Stack scale="l">
               <Text.Headline as="h1" intlMessage={messages.title} />
             </Spacings.Stack>
-            <SpacingsInline>
+            <SearchTextInput
+              value="foo"
+              onSubmit={(value) => searchProducts(value)}
+              onReset={() => alert('reset')}
+            />
+            <SpacingsInline alignItems="center">
               <div style={{ maxWidth: '200px', width: '100%' }}>
                 <SelectInput
                   name="form-field-name"
@@ -206,6 +230,14 @@ const Products = () => {
                   ]}
                 />
               </div>
+              {check.length > 0 && (
+                <>
+                  <Text.Detail tone="primary" isBold>
+                    {check.length}{' '}
+                  </Text.Detail>
+                  <Text.Detail isBold>Product Selected</Text.Detail>
+                </>
+              )}
             </SpacingsInline>
             <Spacings.Stack scale="l">
               <DataTable
@@ -226,7 +258,10 @@ const Products = () => {
               />
               <Switch>
                 <Route path={`${match.path}/:id`}>
-                  <ProductDetails onClose={() => push(`${match.url}`)} />
+                  <ProductDetails
+                    onClose={() => push(`${match.url}`)}
+                    refetch={refetch}
+                  />
                 </Route>
               </Switch>
             </Spacings.Stack>

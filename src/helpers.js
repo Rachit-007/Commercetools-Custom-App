@@ -25,10 +25,16 @@ const getNameFromPayload = (payload) => ({
   name: transformLocalizedStringToLocalizedField(payload.name),
 });
 
+const getDescFromPayload = (payload) => ({
+  description: transformLocalizedStringToLocalizedField(payload.description),
+});
+
 const convertAction = (actionName, actionPayload) => ({
   [actionName]:
     actionName === 'changeName'
       ? getNameFromPayload(actionPayload)
+      : actionName === 'setDescription'
+      ? getDescFromPayload(actionPayload)
       : actionPayload,
 });
 

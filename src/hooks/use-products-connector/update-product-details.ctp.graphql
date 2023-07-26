@@ -1,9 +1,9 @@
-mutation updateProuductToPublish(
+mutation UpdateProductDetails(
+  $productId: String!
   $version: Long!
-  $id: String
   $actions: [ProductUpdateAction!]!
 ) {
-  updateProduct(version: $version, actions: $actions, id: $id) {
+  updateProduct(id: $productId, version: $version, actions: $actions) {
     id
     key
     skus

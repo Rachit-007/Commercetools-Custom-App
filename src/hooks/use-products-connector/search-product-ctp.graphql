@@ -1,0 +1,7 @@
+query searchProducts($term: String!) {
+  productProjectionSearch(staged: true, locale: "en", text: $term, limit: 20) {
+    results {
+      id
+    }
+  }
+}
