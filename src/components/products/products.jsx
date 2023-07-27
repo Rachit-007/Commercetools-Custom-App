@@ -22,11 +22,8 @@ import { DotIcon } from '@commercetools-uikit/icons';
 import Text from '@commercetools-uikit/text';
 import ProductDetails from '../product-details';
 import { Switch, useHistory, useRouteMatch, Route } from 'react-router';
-import { GRAPHQL_TARGETS } from '@commercetools-frontend/constants';
-import { includes, some } from 'lodash';
+import { some } from 'lodash';
 import SearchTextInput from '@commercetools-uikit/search-text-input';
-
-import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
 
 const Products = () => {
   const match = useRouteMatch();
@@ -177,12 +174,17 @@ const Products = () => {
         <>
           <Spacings.Stack scale="l">
             <Spacings.Stack scale="l">
-              <Text.Headline as="h1" intlMessage={messages.title} />
+              <SpacingsInline alignItems="center">
+                <Text.Headline as="h1" intlMessage={messages.title} />
+                <span style={{ color: 'gray' }}>
+                  {parseInt(products.total).toLocaleString()} results
+                </span>
+              </SpacingsInline>
             </Spacings.Stack>
             <SearchTextInput
-              value="foo"
+              placeholder="Search Here For Products..."
               onSubmit={(value) => searchProducts(value)}
-              onReset={() => alert('reset')}
+              onReset={() => console.log('reset')}
             />
             <SpacingsInline alignItems="center">
               <div style={{ maxWidth: '200px', width: '100%' }}>

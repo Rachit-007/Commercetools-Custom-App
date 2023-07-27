@@ -33,11 +33,12 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
     useMcMutation(ChangeProductStatus);
   const showNotification = useShowNotification();
 
-  const [fetchSearchProducts] = useMcLazyQuery(SearchProductsQuery);
+  const [fetchSearchProducts, { data: searchedProductsData }] =
+    useMcLazyQuery(SearchProductsQuery);
 
   const searchProducts = async (value) => {
     try {
-      const { data } = await fetchSearchProducts({
+      await fetchSearchProducts({
         variables: {
           term: value,
         },
@@ -50,11 +51,17 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
     }
   };
 
+  const resultString = searchedProductsData?.productProjectionSearch?.results
+    .map((id) => `"${id.id}"`)
+    .join(',');
+  const finalString = resultString ? `id in (${resultString})` : null;
+
   const { data, loading, error, refetch } = useMcQuery(FetchProductQuery, {
     variables: {
       limit: perPage.value,
       offset: (page.value - 1) * perPage.value,
       sort: [`${tableSorting.value.key} ${tableSorting.value.order}`],
+      where: finalString,
     },
     context: {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
@@ -130,6 +137,7 @@ export const useProducts = ({ page, perPage, tableSorting }) => {
       });
     }
   };
+
   return {
     products: data?.products,
     loading: loading,
