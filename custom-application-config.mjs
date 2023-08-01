@@ -13,12 +13,12 @@ const config = {
       initialProjectKey: 'commercetools-practice',
     },
     production: {
-      applicationId: 'TODO',
-      url: 'https://your_app_hostname.com',
+      applicationId: 'clkdlxsr70006us01zvbsz1zd',
+      url: 'https://customapps-commercetools.web.app',
     },
   },
   oAuthScopes: {
-    view: ['view_products'],
+    view: ['view_products', 'view_orders'],
     manage: ['manage_products'],
   },
   icon: '${path:@commercetools-frontend/assets/application-icons/rocket.svg}',
@@ -37,6 +37,12 @@ const config = {
     {
       uriPath: 'products',
       defaultLabel: 'Products',
+      labelAllLocales: [],
+      permissions: [PERMISSIONS.View],
+    },
+    {
+      uriPath: 'reports',
+      defaultLabel: 'Reports',
       labelAllLocales: [],
       permissions: [PERMISSIONS.View],
     },

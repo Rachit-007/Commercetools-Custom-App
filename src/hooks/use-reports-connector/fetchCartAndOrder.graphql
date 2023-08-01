@@ -1,0 +1,27 @@
+query GetCartsAndOrders(
+  $ordersort: [String!]
+  $cartsort: [String!]
+  $cartwhere: String
+  $orderwhere: String
+  $limit: Int
+) {
+  soldCarts: orders(where: $orderwhere, sort: $ordersort, limit: $limit) {
+    total
+
+    count
+
+    results {
+      createdAt
+    }
+  }
+
+  abandonedCarts: carts(sort: $cartsort, where: $cartwhere, limit: $limit) {
+    count
+
+    total
+
+    results {
+      lastModifiedAt
+    }
+  }
+}
